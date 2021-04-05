@@ -1,14 +1,37 @@
-use std::io;
+use std::io::prelude::*;
+use std::net::TcpStream;
+use std::net::TcpListener;
+use std::fs::File;
 
 fn main() {
-    println!("Guess the number!");          // 数を当ててごらん
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
 
-    println!("Please input your guess.");   // ほら、予想を入力してね
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
 
-    let mut guess = String::new();
+        handle_connection(stream);
+    }
+}
 
-    io::stdin().read_line(&mut guess)
-        .expect("Failed to read line");     // 行の読み込みに失敗しました
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 1024];
+    stream.read(&mut buffer).unwrap();
 
-    println!("You guessed: {}", guess);     // 次のように予想しました: {}
+    let get = b"GET / HTTP/1.1\r\n";
+
+    let (status_line, filename) = if buffer.starts_with(get) {
+        ("HTTP/1.1 200 OK\r\n\r\n", "hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
+    };
+
+    let mut file = File::open(filename).unwrap();
+    let mut contents = String::new();
+
+    file.read_to_string(&mut contents).unwrap();
+
+    let response = format!("{}{}", status_line, contents);
+
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
 }
