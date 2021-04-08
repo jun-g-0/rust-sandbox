@@ -16,3 +16,5 @@ dotenv = "0"
 serde = "1"
 chrono = { version = "0", features = ["serde"] }
 r2d2 = "0"
+actix-files = "0.5"
+env_logger = "0.8"
