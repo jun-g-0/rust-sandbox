@@ -25,9 +25,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(hello)
             .service(echo)
-            .service(Files::new("/images", "static/images/").show_files_listing())
-            .service(Files::new("/", "./static").index_file("index.html"))
             .route("/hey", web::get().to(manual_hello))
+            .service(Files::new("/", "./static").index_file("index.html"))
     })
     .bind("127.0.0.1:8080")?
     .run()
