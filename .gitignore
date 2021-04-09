@@ -2,3 +2,5 @@ cc/
 .env
 
 /target
+.DS_Store
+front/
